@@ -1,33 +1,43 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
-const path = require("path");
 
 const app = express();
+
+// تفعيل الجسر (CORS) للسماح لبلوجر بالاتصال بالسيرفر
 app.use(cors());
-app.use(express.static("public"));
+app.use(express.json());
+
+// مسار للتحقق من أن السيرفر يعمل (للتجربة فقط)
+app.get("/", (req, res) => {
+    res.send("Server is Running and Bridge is Open! ✅");
+});
 
 app.get("/api/download", async (req, res) => {
-    const url = req.query.url;
-    if (!url) return res.json({ error: "ضع رابط الفيديو" });
+    const videoUrl = req.query.url;
+    
+    if (!videoUrl) {
+        return res.json({ error: "يرجى وضع رابط الفيديو" });
+    }
 
     try {
         const response = await axios.get("https://tiktok-video-no-watermark2.p.rapidapi.com/", {
-            params: { url: url },
+            params: { url: videoUrl },
             headers: {
-                // هنا قمنا بتغيير المفتاح ليكون مخفياً (متغير بيئة)
                 "x-rapidapi-key": process.env.MY_TIKTOK_KEY, 
                 "x-rapidapi-host": "tiktok-video-no-watermark2.p.rapidapi.com"
             }
         });
+        
+        // إرسال البيانات المستلمة من تيك توك إلى بلوجر
         res.json(response.data);
     } catch (err) {
-        res.json({ error: "فشل الجلب" });
+        console.error("Error fetching from RapidAPI:", err.message);
+        res.status(500).json({ error: "فشل جلب الفيديو من السيرفر" });
     }
 });
 
-// تعديل بسيط ليعمل السيرفر على أي منفذ توفره الاستضافة
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-    console.log(`السيرفر يعمل الآن على المنفذ: ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
