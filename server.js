@@ -15,8 +15,8 @@ app.get("/api/download", async (req, res) => {
         const response = await axios.get("https://tiktok-video-no-watermark2.p.rapidapi.com/", {
             params: { url: url },
             headers: {
-                // تأكد من وضع مفتاحك هنا
-                "x-rapidapi-key": "820b95c15bmshea62780db1f1771p18b997jsndd50fbd9367d",
+                // هنا قمنا بتغيير المفتاح ليكون مخفياً (متغير بيئة)
+                "x-rapidapi-key": process.env.MY_TIKTOK_KEY, 
                 "x-rapidapi-host": "tiktok-video-no-watermark2.p.rapidapi.com"
             }
         });
@@ -26,6 +26,8 @@ app.get("/api/download", async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log("السيرفر يعمل الآن على: http://localhost:3000");
+// تعديل بسيط ليعمل السيرفر على أي منفذ توفره الاستضافة
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`السيرفر يعمل الآن على المنفذ: ${PORT}`);
 });
